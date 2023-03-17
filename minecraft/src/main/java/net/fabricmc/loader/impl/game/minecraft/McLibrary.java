@@ -21,7 +21,7 @@ import net.fabricmc.loader.impl.game.LibClassifier.LibraryType;
 
 enum McLibrary implements LibraryType {
 	MC_CLIENT(EnvType.CLIENT, "net/minecraft/client/main/Main.class", "net/minecraft/client/MinecraftApplet.class", "com/mojang/minecraft/MinecraftApplet.class"),
-	MC_SERVER(EnvType.SERVER, "net/minecraft/server/Main.class", "net/minecraft/server/MinecraftServer.class", "com/mojang/minecraft/server/MinecraftServer.class"),
+	MC_SERVER(EnvType.SERVER, "org/bukkit/craftbukkit/Main.class"),
 	MC_COMMON("net/minecraft/server/MinecraftServer.class"),
 	MC_BUNDLER(EnvType.SERVER, "net/minecraft/bundler/Main.class"),
 	REALMS(EnvType.CLIENT, "realmsVersion", "com/mojang/realmsclient/RealmsVersion.class"),
