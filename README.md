@@ -1,8 +1,12 @@
-fabric-loader
-===========
+# Silk-loader
+Silk on fabric-loader. A proof of conception.
 
-The loader for mods under Fabric. It provides mod loading facilities and useful abstractions for other mods to use.
+## Todo
+- [ ] Everything
 
-## License
+- [ ] Silk-loom
+  - [ ] Remap spigot jar to mojang mappings with tiny remapper.
 
-Licensed under the Apache License 2.0.
+- [ ] Silk-loader
+
+- [ ] Silk
