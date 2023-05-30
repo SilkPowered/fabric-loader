@@ -45,8 +45,7 @@ dependencies {
 
 	testImplementation project(":junit")
 
-	spigot 'org.spigotmc:spigot:1.19.3-R0.1-20230314.170437-5:remapped-mojang'
-
+	spigot 'org.spigotmc:spigot:1.19.4-R0.1-20230524.213853-14:remapped-mojang'
 }
 
 test {
