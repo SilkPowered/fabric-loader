@@ -29,6 +29,7 @@ import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
@@ -65,16 +66,30 @@ public class EntrypointPatch extends GamePatch {
 	public void process(FabricLauncher launcher, Function<String, ClassReader> classSource, Consumer<ClassNode> classEmitter) {
 		EnvType type = launcher.getEnvironmentType();
 		String entrypoint = launcher.getEntrypoint();
+
+		// Silk.
+		// Todo: qyl27: read main class from launcher.
+		String mainClassEntryPoint = "net.minecraft.server.Main";
+
 		Version gameVersion = getGameVersion();
 
-		if (!entrypoint.startsWith("net.minecraft.") && !entrypoint.startsWith("com.mojang.")) {
+		if (!entrypoint.startsWith("net.minecraft.") && !entrypoint.startsWith("com.mojang.") && !entrypoint.startsWith("org.bukkit.craftbukkit.")) {
 			return;
 		}
 
 		String gameEntrypoint = null;
 		boolean serverHasFile = true;
 		boolean isApplet = entrypoint.contains("Applet");
-		ClassNode mainClass = readClass(classSource.apply(entrypoint));
+
+		boolean isSpigot = entrypoint.startsWith("org.bukkit.craftbukkit.");
+
+		ClassNode mainClass;
+		if (isSpigot) {
+			mainClass = readClass(classSource.apply(mainClassEntryPoint));
+		} else {
+			mainClass = readClass(classSource.apply(entrypoint));
+		}
+		// Silk end.
 
 		if (mainClass == null) {
 			throw new RuntimeException("Could not load main class " + entrypoint + "!");
@@ -107,7 +122,15 @@ public class EntrypointPatch extends GamePatch {
 
 		if (gameEntrypoint == null) {
 			// main method searches
-			MethodNode mainMethod = findMethod(mainClass, (method) -> method.name.equals("main") && method.desc.equals("([Ljava/lang/String;)V") && isPublicStatic(method.access));
+
+			// Silk.
+			MethodNode mainMethod;
+			if (isSpigot) {
+				mainMethod = findMethod(mainClass, (method) -> method.name.equals("main") && method.desc.equals("(Ljoptsimple/OptionSet;)V") && isPublicStatic(method.access));
+			} else {
+				mainMethod = findMethod(mainClass, (method) -> method.name.equals("main") && method.desc.equals("([Ljava/lang/String;)V") && isPublicStatic(method.access));
+			}
+			//Silk end.
 
 			if (mainMethod == null) {
 				throw new RuntimeException("Could not find main method in " + entrypoint + "!");
@@ -254,7 +277,15 @@ public class EntrypointPatch extends GamePatch {
 				}
 			}
 		} else {
-			gameMethod = findMethod(mainClass, (method) -> method.name.equals("main") && method.desc.equals("([Ljava/lang/String;)V") && isPublicStatic(method.access));
+
+			// Silk.
+			if (isSpigot) {
+				gameMethod = findMethod(mainClass, (method) -> method.name.equals("main") && method.desc.equals("(Ljoptsimple/OptionSet;)V") && isPublicStatic(method.access));
+			} else {
+				gameMethod = findMethod(mainClass, (method) -> method.name.equals("main") && method.desc.equals("([Ljava/lang/String;)V") && isPublicStatic(method.access));
+			}
+			// Silk end.
+
 		}
 
 		if (gameMethod == null) {
@@ -388,19 +419,40 @@ public class EntrypointPatch extends GamePatch {
 					final ListIterator<AbstractInsnNode> serverStartIt = serverStartMethod.instructions.iterator();
 
 					// 1.16-pre1+ Find the only constructor which takes a Thread as it's first parameter
-					MethodInsnNode dedicatedServerConstructor = (MethodInsnNode) findInsn(serverStartMethod, insn -> {
-						if (insn instanceof MethodInsnNode && ((MethodInsnNode) insn).name.equals("<init>")) {
-							Type constructorType = Type.getMethodType(((MethodInsnNode) insn).desc);
 
-							if (constructorType.getArgumentTypes().length <= 0) {
-								return false;
+					// Silk.
+					MethodInsnNode dedicatedServerConstructor;
+					if (isSpigot) {
+						serverStartMethod = mainClass.methods.get(7);	// Fixme: qyl27: temp impl.
+						dedicatedServerConstructor = (MethodInsnNode) findInsn(serverStartMethod, insn -> {
+							if (insn instanceof MethodInsnNode && ((MethodInsnNode) insn).owner.equals("net/minecraft/server/dedicated/DedicatedServer")) {
+								Type constructorType = Type.getMethodType(((MethodInsnNode) insn).desc);
+
+								if (constructorType.getArgumentTypes().length <= 0) {
+									return false;
+								}
+
+								return constructorType.getArgumentTypes()[0].getDescriptor().equals("Ljoptsimple/OptionSet;");
 							}
 
-							return constructorType.getArgumentTypes()[0].getDescriptor().equals("Ljava/lang/Thread;");
-						}
+							return false;
+						}, false);
+					} else {
+						dedicatedServerConstructor = (MethodInsnNode) findInsn(serverStartMethod, insn -> {
+							if (insn instanceof MethodInsnNode && ((MethodInsnNode) insn).name.equals("<init>")) {
+								Type constructorType = Type.getMethodType(((MethodInsnNode) insn).desc);
 
-						return false;
-					}, false);
+								if (constructorType.getArgumentTypes().length <= 0) {
+									return false;
+								}
+
+								return constructorType.getArgumentTypes()[0].getDescriptor().equals("Ljava/lang/Thread;");
+							}
+
+							return false;
+						}, false);
+					}
+					// Silk end.
 
 					if (dedicatedServerConstructor == null) {
 						throw new RuntimeException("Could not find dedicated server constructor");

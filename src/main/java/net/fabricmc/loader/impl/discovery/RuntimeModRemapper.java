@@ -64,10 +64,12 @@ public final class RuntimeModRemapper {
 
 		FabricLauncher launcher = FabricLauncherBase.getLauncher();
 
+		// Silk.
 		TinyRemapper remapper = TinyRemapper.newRemapper()
 				.withMappings(TinyRemapperMappingsHelper.create(launcher.getMappingConfiguration().getMappings(), "intermediary", launcher.getTargetNamespace()))
 				.renameInvalidLocals(false)
 				.build();
+		// Silk end.
 
 		try {
 			remapper.readClassPathAsync(getRemapClasspath().toArray(new Path[0]));

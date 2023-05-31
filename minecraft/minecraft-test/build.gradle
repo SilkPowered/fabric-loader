@@ -45,6 +45,8 @@ dependencies {
 
 	testImplementation project(":junit")
 
+//	modImplementation 'net.fabricmc.fabric-api:fabric-api:0.83.0+1.19.4'
+
 	spigot 'org.spigotmc:spigot:1.19.4-R0.1-20230524.213853-14:remapped-mojang'
 }
 

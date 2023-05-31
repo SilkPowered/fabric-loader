@@ -35,7 +35,7 @@ import net.fabricmc.loader.api.FabricLoader;
 public class JunitTest {
 	@BeforeAll
 	public static void setup() {
-		SharedConstants.createGameVersion();
+		SharedConstants.a();
 		Bootstrap.initialize();
 	}
 

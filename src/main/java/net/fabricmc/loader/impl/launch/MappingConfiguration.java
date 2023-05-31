@@ -65,18 +65,31 @@ public final class MappingConfiguration {
 	}
 
 	public String getTargetNamespace() {
-		return FabricLauncherBase.getLauncher().isDevelopment() ? "named" : "intermediary";
+
+		// Silk.
+//		return FabricLauncherBase.getLauncher().isDevelopment() ? "named" : "intermediary";
+		return FabricLauncherBase.getLauncher().isDevelopment() ? "spigot" : "intermediary";
+		// Silk end.
+
 	}
 
 	public boolean requiresPackageAccessHack() {
 		// TODO
-		return getTargetNamespace().equals("named");
+
+		// Silk.
+//		return getTargetNamespace().equals("named");
+		return getTargetNamespace().equals("spigot");
+		// Silk end.
+
 	}
 
 	private void initialize() {
 		if (initialized) return;
 
-		URL url = MappingConfiguration.class.getClassLoader().getResource("mappings/mappings.tiny");
+		// Silk.
+//		URL url = MappingConfiguration.class.getClassLoader().getResource("mappings/mappings.tiny");
+		URL url = MappingConfiguration.class.getClassLoader().getResource("1.19.4.tiny");
+		// Silk end.
 
 		if (url != null) {
 			try {
