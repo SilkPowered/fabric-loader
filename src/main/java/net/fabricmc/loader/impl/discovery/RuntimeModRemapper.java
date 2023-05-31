@@ -103,6 +103,11 @@ public final class RuntimeModRemapper {
 				remapper.readInputsAsync(tag, info.inputPath);
 			}
 
+			// Silk.
+			// Fixme: qyl27: Inflater has been closed.
+			Thread.sleep(1000);
+			// Silk end.
+
 			//Done in a 2nd loop as we need to make sure all the inputs are present before remapping
 			for (ModCandidate mod : modsToRemap) {
 				RemapInfo info = infoMap.get(mod);

@@ -23,3 +23,5 @@
 
 !/minecraft
 !/junit
+
+!/minecraft/minecraft-test/gradle.properties
